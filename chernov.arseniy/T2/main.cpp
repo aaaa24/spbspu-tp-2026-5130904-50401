@@ -37,9 +37,9 @@ namespace chernov {
   private:
     std::basic_ios< char > & s_;
     std::streamsize width_;
+    char fill_;
     std::streamsize precision_;
     std::basic_ios< char >::fmtflags fmt_;
-    char fill_;
   };
 
   std::istream & operator>>(std::istream & input, LongLongIO && dest);
@@ -188,4 +188,20 @@ std::ostream & chernov::operator<<(std::ostream & output, const DataStruct & des
   IOguard fmtguard(output);
   output << "(:key1 " << dest.key1 << ":key2 " << dest.key2 << ":key3 " << dest.key3 << ":)";
   return output;
+}
+
+chernov::IOguard::IOguard(std::basic_ios< char > & s):
+  s_(s),
+  width_(s.width()),
+  fill_(s.fill()),
+  precision_(s.precision()),
+  fmt_(s.flags())
+{}
+
+chernov::IOguard::~IOguard()
+{
+  s_.width(width_);
+  s_.fill(fill_);
+  s_.precision(precision_);
+  s_.flags(fmt_);
 }
