@@ -1,5 +1,6 @@
 #include "datastruct.hpp"
 
+#include <unordered_set>
 
 std::istream & chernov::operator>>(std::istream & input, LongLongIO && dest)
 {
@@ -78,21 +79,43 @@ std::istream & chernov::operator>>(std::istream & input, DataStruct & dest)
   if (!sentry) {
     return input;
   }
+
   DataStruct data_input;
-  {
-    using sep = DelimitersIO;
-    using lbl = LabelIO;
-    using ll = LongLongIO;
-    using ull = UnsignedLongLongIO;
-    using str = StringIO;
-    input >> sep{"(:"};
-    input >> lbl{"key1"} >> ll{data_input.key1};
+  using sep = DelimitersIO;
+  using ll = LongLongIO;
+  using ull = UnsignedLongLongIO;
+  using str = StringIO;
+
+  size_t key = 0;
+  std::unordered_set< size_t > entered_keys;
+
+  input >> sep{"(:"};
+  for (size_t i = 0; input && i < 3; ++i) {
+    input >> sep{"key"} >> key;
+
+    if (entered_keys.count(key)) {
+      input.setstate(std::ios::failbit);
+      break;
+    }
+    entered_keys.insert(key);
+
+    switch (key) {
+      case 1:
+        input >> ll{data_input.key1};
+        break;
+      case 2:
+        input >> ull{data_input.key2};
+        break;
+      case 3:
+        input >> str{data_input.key3};
+        break;
+      default:
+        input.setstate(std::ios::failbit);
+    }
     input >> sep{":"};
-    input >> lbl{"key2"} >> ull{data_input.key2};
-    input >> sep{":"};
-    input >> lbl{"key3"} >> str{data_input.key3};
-    input >> sep{":)"};
   }
+  input >> sep{")"};
+
   if (input) {
     dest = data_input;
   }
