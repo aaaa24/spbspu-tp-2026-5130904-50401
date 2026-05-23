@@ -7,7 +7,7 @@ std::istream & chernov::operator>>(std::istream & input, LongLongIO && dest)
   if (!sentry) {
     return input;
   }
-  return input >> dest.ref >> DelimiterIO{'l'} >> DelimiterIO{'l'};
+  return input >> dest.ref >> DelimitersIO{"ll"};
 }
 
 std::istream & chernov::operator>>(std::istream & input, UnsignedLongLongIO && dest)
@@ -16,7 +16,7 @@ std::istream & chernov::operator>>(std::istream & input, UnsignedLongLongIO && d
   if (!sentry) {
     return input;
   }
-  return input >> dest.ref >> DelimiterIO{'u'} >> DelimiterIO{'l'} >> DelimiterIO{'l'};
+  return input >> dest.ref >> DelimitersIO{"ull"};
 }
 
 std::istream & chernov::operator>>(std::istream & input, StringIO && dest)
@@ -56,6 +56,22 @@ std::istream & chernov::operator>>(std::istream & input, DelimiterIO && dest)
   return input;
 }
 
+std::istream & chernov::operator>>(std::istream & input, DelimitersIO && dest)
+{
+  std::istream::sentry sentry(input);
+  if (!sentry) {
+    return input;
+  }
+  char c = 0;
+  for (size_t i = 0; input && i < dest.exp.size(); ++i) {
+    input >> c;
+    if (c != dest.exp[i]) {
+      input.setstate(std::ios::failbit);
+    }
+  }
+  return input;
+}
+
 std::istream & chernov::operator>>(std::istream & input, DataStruct & dest)
 {
   std::istream::sentry sentry(input);
@@ -64,18 +80,18 @@ std::istream & chernov::operator>>(std::istream & input, DataStruct & dest)
   }
   DataStruct data_input;
   {
-    using sep = DelimiterIO;
+    using sep = DelimitersIO;
     using lbl = LabelIO;
     using ll = LongLongIO;
     using ull = UnsignedLongLongIO;
     using str = StringIO;
-    input >> sep{'('} >> sep{':'};
+    input >> sep{"(:"};
     input >> lbl{"key1"} >> ll{data_input.key1};
-    input >> sep{':'};
+    input >> sep{":"};
     input >> lbl{"key2"} >> ull{data_input.key2};
-    input >> sep{':'};
+    input >> sep{":"};
     input >> lbl{"key3"} >> str{data_input.key3};
-    input >> sep{':'} >> sep{')'};
+    input >> sep{":)"};
   }
   if (input) {
     dest = data_input;

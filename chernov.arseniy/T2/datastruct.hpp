@@ -42,6 +42,10 @@ namespace chernov {
     char exp;
   };
 
+  struct DelimitersIO {
+    std::string exp;
+  };
+
   class IOguard {
   public:
     explicit IOguard(std::basic_ios< char > & s);
@@ -59,6 +63,7 @@ namespace chernov {
   std::istream & operator>>(std::istream & input, StringIO && dest);
   std::istream & operator>>(std::istream & input, LabelIO && dest);
   std::istream & operator>>(std::istream & input, DelimiterIO && dest);
+  std::istream & operator>>(std::istream & input, DelimitersIO && dest);
   std::istream & operator>>(std::istream & input, DataStruct & dest);
 
   std::ostream & operator<<(std::ostream & output, const ConstLongLongIO & dest);
