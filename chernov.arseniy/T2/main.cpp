@@ -60,7 +60,7 @@ int main()
     std::copy(iit_t{iss}, iit_t{}, std::back_inserter(data));
   }
   {
-    using oit_t = std::istream_iterator< chernov::DataStruct >;
+    using oit_t = std::ostream_iterator< chernov::DataStruct >;
     std::copy(std::begin(data), std::end(data), oit_t{std::cout, "\n"});
   }
 }
@@ -119,4 +119,29 @@ std::istream & chernov::operator>>(std::istream & input, DelimiterIO && dest)
   return input;
 }
 
-
+std::istream & chernov::operator>>(std::istream & input, DataStruct & dest)
+{
+  std::istream::sentry sentry(input);
+  if (!sentry) {
+    return input;
+  }
+  DataStruct data_input;
+  {
+    using sep = DelimiterIO;
+    using lbl = LabelIO;
+    using ll = LongLongIO;
+    using ull = UnsignedLongLongIO;
+    using str = StringIO;
+    input >> sep{'('} >> sep{':'};
+    input >> lbl{"key1"} >> ll{data_input.key1};
+    input >> sep{':'};
+    input >> lbl{"key2"} >> ull{data_input.key2};
+    input >> sep{':'};
+    input >> lbl{"key3"} >> str{data_input.key3};
+    input >> sep{':'} >> sep{')'};
+  }
+  if (input) {
+    dest = data_input;
+  }
+  return input;
+}
