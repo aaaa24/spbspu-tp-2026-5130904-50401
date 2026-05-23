@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <iostream>
 #include <iterator>
 #include <sstream>
@@ -20,6 +21,18 @@ namespace chernov {
 
   struct StringIO {
     std::string & ref;
+  };
+
+  struct ConstLongLongIO {
+    const long long & ref;
+  };
+
+  struct ConstUnsignedLongLongIO {
+    const unsigned long long & ref;
+  };
+
+  struct ConstStringIO {
+    const std::string & ref;
   };
 
   struct LabelIO {
@@ -48,24 +61,24 @@ namespace chernov {
   std::istream & operator>>(std::istream & input, LabelIO && dest);
   std::istream & operator>>(std::istream & input, DelimiterIO && dest);
   std::istream & operator>>(std::istream & input, DataStruct & dest);
-  std::ostream & operator<<(std::ostream & output, const LongLongIO & dest);
-  std::ostream & operator<<(std::ostream & output, const UnsignedLongLongIO & dest);
-  std::ostream & operator<<(std::ostream & output, const StringIO & dest);
+
+  std::ostream & operator<<(std::ostream & output, const ConstLongLongIO & dest);
+  std::ostream & operator<<(std::ostream & output, const ConstUnsignedLongLongIO & dest);
+  std::ostream & operator<<(std::ostream & output, const ConstStringIO & dest);
   std::ostream & operator<<(std::ostream & output, const DataStruct & dest);
+
+  bool operator<(const DataStruct & lhs, const DataStruct & rhs);
 }
 
 int main()
 {
   std::vector< chernov::DataStruct > data;
-  std::istringstream iss("(:key1 10ull:key2 ’c’:key3 \"Data\":)");
-  {
-    using iit_t = std::istream_iterator< chernov::DataStruct >;
-    std::copy(iit_t{iss}, iit_t{}, std::back_inserter(data));
-  }
-  {
-    using oit_t = std::ostream_iterator< chernov::DataStruct >;
-    std::copy(std::begin(data), std::end(data), oit_t{std::cout, "\n"});
-  }
+  using iit_t = std::istream_iterator< chernov::DataStruct >;
+  using oit_t = std::ostream_iterator< chernov::DataStruct >;
+
+  std::copy(iit_t{std::cin}, iit_t{}, std::back_inserter(data));
+  std::sort(data.begin(), data.end());
+  std::copy(std::begin(data), std::end(data), oit_t{std::cout, "\n"});
 }
 
 std::istream & chernov::operator>>(std::istream & input, LongLongIO && dest)
@@ -102,7 +115,8 @@ std::istream & chernov::operator>>(std::istream & input, LabelIO && dest)
     return input;
   }
   std::string data = "";
-  if ((input >> StringIO{data}) && (data != dest.exp)) {
+  if ((input >> data) && (data != dest.exp)) {
+    std::cout << "data: " << data << "; dest.exp: " << dest.exp << "\n";
     input.setstate(std::ios::failbit);
   }
   return input;
@@ -149,7 +163,7 @@ std::istream & chernov::operator>>(std::istream & input, DataStruct & dest)
   return input;
 }
 
-std::ostream & chernov::operator<<(std::ostream & output, const LongLongIO & dest)
+std::ostream & chernov::operator<<(std::ostream & output, const ConstLongLongIO & dest)
 {
   std::ostream::sentry sentry(output);
   if (!sentry) {
@@ -159,7 +173,7 @@ std::ostream & chernov::operator<<(std::ostream & output, const LongLongIO & des
   return output << dest.ref << "ll";
 }
 
-std::ostream & chernov::operator<<(std::ostream & output, const UnsignedLongLongIO & dest)
+std::ostream & chernov::operator<<(std::ostream & output, const ConstUnsignedLongLongIO & dest)
 {
   std::ostream::sentry sentry(output);
   if (!sentry) {
@@ -169,7 +183,7 @@ std::ostream & chernov::operator<<(std::ostream & output, const UnsignedLongLong
   return output << dest.ref << "ull";
 }
 
-std::ostream & chernov::operator<<(std::ostream & output, const StringIO & dest)
+std::ostream & chernov::operator<<(std::ostream & output, const ConstStringIO & dest)
 {
   std::ostream::sentry sentry(output);
   if (!sentry) {
@@ -186,8 +200,23 @@ std::ostream & chernov::operator<<(std::ostream & output, const DataStruct & des
     return output;
   }
   IOguard fmtguard(output);
-  output << "(:key1 " << dest.key1 << ":key2 " << dest.key2 << ":key3 " << dest.key3 << ":)";
+
+  using ll = ConstLongLongIO;
+  using ull = ConstUnsignedLongLongIO;
+  using str = ConstStringIO;
+  output << "(:key1 " << ll{dest.key1} << ":key2 " << ull{dest.key2} << ":key3 " << str{dest.key3} << ":)";
   return output;
+}
+
+bool chernov::operator<(const DataStruct & lhs, const DataStruct & rhs)
+{
+  if (lhs.key1 == rhs.key1) {
+    if (lhs.key2 == rhs.key2) {
+      return lhs.key3.size() < rhs.key3.size();
+    }
+    return lhs.key2 < rhs.key2;
+  }
+  return lhs.key1 < rhs.key1;
 }
 
 chernov::IOguard::IOguard(std::basic_ios< char > & s):
