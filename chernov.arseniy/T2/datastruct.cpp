@@ -130,13 +130,10 @@ std::ostream & chernov::operator<<(std::ostream & output, const DataStruct & des
 
 bool chernov::operator<(const DataStruct & lhs, const DataStruct & rhs)
 {
-  if (lhs.key1 == rhs.key1) {
-    if (lhs.key2 == rhs.key2) {
-      return lhs.key3.size() < rhs.key3.size();
-    }
-    return lhs.key2 < rhs.key2;
-  }
-  return lhs.key1 < rhs.key1;
+  bool result = (lhs.key1 < rhs.key1) && !(lhs.key1 == rhs.key1);
+  result = result || ((lhs.key2 < rhs.key2) && (lhs.key1 == rhs.key1) && !(lhs.key2 == rhs.key2));
+  result = result || ((lhs.key3.size() < rhs.key3.size()) && (lhs.key1 == rhs.key1) && (lhs.key2 == rhs.key2));
+  return result;
 }
 
 chernov::IOguard::IOguard(std::basic_ios< char > & s):
