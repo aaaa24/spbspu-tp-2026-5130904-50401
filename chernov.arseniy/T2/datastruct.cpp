@@ -1,5 +1,6 @@
 #include "datastruct.hpp"
 
+#include <cctype>
 #include <unordered_set>
 
 std::istream & chernov::operator>>(std::istream & input, LongLongIO && dest)
@@ -8,7 +9,7 @@ std::istream & chernov::operator>>(std::istream & input, LongLongIO && dest)
   if (!sentry) {
     return input;
   }
-  return input >> dest.ref >> DelimitersIO{"ll"};
+  return input >> dest.ref >> DelimitersAnyCaseIO{"ll"};
 }
 
 std::istream & chernov::operator>>(std::istream & input, UnsignedLongLongIO && dest)
@@ -17,7 +18,7 @@ std::istream & chernov::operator>>(std::istream & input, UnsignedLongLongIO && d
   if (!sentry) {
     return input;
   }
-  return input >> dest.ref >> DelimitersIO{"ull"};
+  return input >> dest.ref >> DelimitersAnyCaseIO{"ull"};
 }
 
 std::istream & chernov::operator>>(std::istream & input, StringIO && dest)
@@ -67,6 +68,22 @@ std::istream & chernov::operator>>(std::istream & input, DelimitersIO && dest)
   for (size_t i = 0; input && i < dest.exp.size(); ++i) {
     input >> c;
     if (c != dest.exp[i]) {
+      input.setstate(std::ios::failbit);
+    }
+  }
+  return input;
+}
+
+std::istream & chernov::operator>>(std::istream & input, DelimitersAnyCaseIO && dest)
+{
+  std::istream::sentry sentry(input);
+  if (!sentry) {
+    return input;
+  }
+  char c = 0;
+  for (size_t i = 0; input && i < dest.exp.size(); ++i) {
+    input >> c;
+    if (std::tolower(c) != std::tolower(dest.exp[i])) {
       input.setstate(std::ios::failbit);
     }
   }
