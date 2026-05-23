@@ -48,7 +48,10 @@ namespace chernov {
   std::istream & operator>>(std::istream & input, LabelIO && dest);
   std::istream & operator>>(std::istream & input, DelimiterIO && dest);
   std::istream & operator>>(std::istream & input, DataStruct & dest);
-  std::istream & operator<<(std::ostream & output, const DataStruct & dest);
+  std::ostream & operator<<(std::ostream & output, const LongLongIO & dest);
+  std::ostream & operator<<(std::ostream & output, const UnsignedLongLongIO & dest);
+  std::ostream & operator<<(std::ostream & output, const StringIO & dest);
+  std::ostream & operator<<(std::ostream & output, const DataStruct & dest);
 }
 
 int main()
@@ -144,4 +147,45 @@ std::istream & chernov::operator>>(std::istream & input, DataStruct & dest)
     dest = data_input;
   }
   return input;
+}
+
+std::ostream & chernov::operator<<(std::ostream & output, const LongLongIO & dest)
+{
+  std::ostream::sentry sentry(output);
+  if (!sentry) {
+    return output;
+  }
+  IOguard fmtguard(output);
+  return output << dest.ref << "ll";
+}
+
+std::ostream & chernov::operator<<(std::ostream & output, const UnsignedLongLongIO & dest)
+{
+  std::ostream::sentry sentry(output);
+  if (!sentry) {
+    return output;
+  }
+  IOguard fmtguard(output);
+  return output << dest.ref << "ull";
+}
+
+std::ostream & chernov::operator<<(std::ostream & output, const StringIO & dest)
+{
+  std::ostream::sentry sentry(output);
+  if (!sentry) {
+    return output;
+  }
+  IOguard fmtguard(output);
+  return output << "\"" << dest.ref << "\"";
+}
+
+std::ostream & chernov::operator<<(std::ostream & output, const DataStruct & dest)
+{
+  std::ostream::sentry sentry(output);
+  if (!sentry) {
+    return output;
+  }
+  IOguard fmtguard(output);
+  output << "(:key1 " << dest.key1 << ":key2 " << dest.key2 << ":key3 " << dest.key3 << ":)";
+  return output;
 }
