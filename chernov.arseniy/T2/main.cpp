@@ -92,6 +92,19 @@ std::istream & chernov::operator>>(std::istream & input, StringIO && dest)
   return std::getline(input >> DelimiterIO{'"'}, dest.ref, '"');
 }
 
+std::istream & chernov::operator>>(std::istream & input, LabelIO && dest)
+{
+  std::istream::sentry sentry(input);
+  if (!sentry) {
+    return input;
+  }
+  std::string data = "";
+  if ((input >> StringIO{data}) && (data != dest.exp)) {
+    input.setstate(std::ios::failbit);
+  }
+  return input;
+}
+
 std::istream & chernov::operator>>(std::istream & input, DelimiterIO && dest)
 {
   std::istream::sentry sentry(input);
@@ -105,3 +118,5 @@ std::istream & chernov::operator>>(std::istream & input, DelimiterIO && dest)
   }
   return input;
 }
+
+
