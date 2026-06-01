@@ -34,7 +34,7 @@ std::istream & chernov::operator>>(std::istream & input, Polygon & dest)
       count_(0)
     {}
 
-    bool operator()(const Point & point)
+    bool operator()(const Point &)
     {
       return count_++ < size_;
     }
