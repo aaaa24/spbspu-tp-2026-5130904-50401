@@ -32,9 +32,6 @@ namespace chernov {
   std::istream & operator>>(std::istream & input, Point & dest);
   std::istream & operator>>(std::istream & input, Polygon & dest);
   std::istream & operator>>(std::istream & input, DelimiterIO && dest);
-
-  std::ostream & operator<<(std::ostream & output, const Point & dest);
-  std::ostream & operator<<(std::ostream & output, const Polygon & dest);
 }
 
 #endif
