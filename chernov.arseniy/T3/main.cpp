@@ -5,6 +5,7 @@
 #include <limits>
 #include <vector>
 
+#include "input.hpp"
 #include "polygon.hpp"
 
 int main(int argc, char ** argv)
@@ -21,14 +22,5 @@ int main(int argc, char ** argv)
   }
 
   std::vector< chernov::Polygon > polygons;
-  using iit_t = std::istream_iterator< chernov::Polygon >;
-  std::streamsize max_streamsize = std::numeric_limits< std::streamsize >::max();
-
-  while (file) {
-    std::copy(iit_t{file}, iit_t{}, std::back_inserter(polygons));
-    if (!file.eof()) {
-      file.clear();
-      file.ignore(max_streamsize, '\n');
-    }
-  }
+  chernov::inputPolygons(file, polygons);
 }
