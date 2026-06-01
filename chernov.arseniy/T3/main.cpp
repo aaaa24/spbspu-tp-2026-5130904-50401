@@ -26,7 +26,7 @@ int main(int argc, char ** argv)
   chernov::inputPolygons(file, polygons);
 
   std::unordered_map< std::string, chernov::cmd_t > cmds;
-  cmds["area"] = chernov::cmdArea;
+  cmds["AREA"] = chernov::cmdArea;
 
   chernov::runCommands(std::cin, std::cout, cmds, polygons);
 }

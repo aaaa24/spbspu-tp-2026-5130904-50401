@@ -16,7 +16,8 @@ namespace chernov {
   void cmdArea(std::istream &, std::ostream &, std::vector< Polygon > &);
 
   namespace detail {
-    double calcSquare(const Polygon & polygon);
+    double calcArea(const Polygon & polygon);
+    double calcAreaMean(const std::vector< Polygon > & polygons);
   }
 }
 
