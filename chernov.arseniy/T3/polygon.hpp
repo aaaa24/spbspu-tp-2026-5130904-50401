@@ -20,6 +20,8 @@ namespace chernov {
   std::istream & operator>>(std::istream & input, Point & dest);
   std::istream & operator>>(std::istream & input, Polygon & dest);
   std::istream & operator>>(std::istream & input, DelimiterIO && dest);
+
+  void inputPolygons(std::istream & input, std::vector< Polygon > & polygons);
 }
 
 #endif

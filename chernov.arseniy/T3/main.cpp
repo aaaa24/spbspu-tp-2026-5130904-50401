@@ -4,8 +4,9 @@
 #include <iterator>
 #include <limits>
 #include <vector>
+#include <unordered_map>
 
-#include "input.hpp"
+#include "commands.hpp"
 #include "polygon.hpp"
 
 int main(int argc, char ** argv)
@@ -23,4 +24,9 @@ int main(int argc, char ** argv)
 
   std::vector< chernov::Polygon > polygons;
   chernov::inputPolygons(file, polygons);
+
+  std::unordered_map< std::string, chernov::cmd_t > cmds;
+  cmds["area"] = chernov::cmdArea;
+
+  chernov::runCommands(std::cin, std::cout, cmds, polygons);
 }
