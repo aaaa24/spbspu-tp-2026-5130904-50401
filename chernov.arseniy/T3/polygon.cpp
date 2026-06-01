@@ -25,8 +25,25 @@ std::istream & chernov::operator>>(std::istream & input, Polygon & dest)
   size_t size = 0;
   input >> size;
 
+  struct CounterIO {
+    size_t size_;
+    size_t count_;
+
+    CounterIO(size_t size):
+      size_(size),
+      count_(0)
+    {}
+
+    bool operator()(const Point & point)
+    {
+      return count_++ < size_;
+    }
+  };
+
+  auto counter = CounterIO{size};
+
   using iit_t = std::istream_iterator< Point >;
-  std::copy_n(iit_t{input}, size, std::back_inserter(dest.points));
+  std::copy_if(iit_t{input}, iit_t{}, std::back_inserter(dest.points), counter);
   return input;
 }
 
