@@ -115,6 +115,36 @@ void chernov::cmdCount(std::istream & input, std::ostream & output, const std::v
   output << count_polygons << "\n";
 }
 
+void chernov::cmdInframe(std::istream & input, std::ostream & output, const std::vector< Polygon > & polygons)
+{
+  Polygon polygon;
+  if (!(input >> polygon)) {
+    return;
+  }
+
+  std::pair< Point, Point > frame = detail::getBoundingFrame(polygons);
+
+  using namespace std::placeholders;
+  auto get_x = std::mem_fn(&Point::x);
+  auto get_y = std::mem_fn(&Point::y);
+  auto comp_x = std::bind(std::logical_and<>{},
+    std::bind(std::greater_equal<>{}, std::bind(get_x, _1), frame.first.x),
+    std::bind(std::less_equal<>{}, std::bind(get_x, _1), frame.second.x)
+  );
+  auto comp_y = std::bind(std::logical_and<>{},
+    std::bind(std::greater_equal<>{}, std::bind(get_y, _1), frame.first.y),
+    std::bind(std::less_equal<>{}, std::bind(get_y, _1), frame.second.y)
+  );
+  auto pred = std::bind(std::logical_and<>{}, comp_x, comp_y);
+
+  size_t count = std::count_if(polygon.points.begin(), polygon.points.end(), pred);
+  if (count == polygon.points.size()) {
+    output << "<TRUE>\n";
+  } else {
+    output << "<FALSE>\n";
+  }
+}
+
 template< class Container >
 std::vector< double > chernov::detail::getAreas(const Container & polygons)
 {
@@ -265,4 +295,58 @@ size_t chernov::detail::countPolygonsWithParam(const std::vector< Polygon > & po
   } else {
     throw std::invalid_argument("param must be \"even\" or \"odd\"");
   }
+}
+
+std::pair< chernov::Point, chernov::Point > chernov::detail::getBoundingFrame(const Polygon & polygon)
+{
+  using namespace std::placeholders;
+  auto get_x = std::mem_fn(&Point::x);
+  auto get_y = std::mem_fn(&Point::y);
+
+  auto less_x = std::bind(std::less<>(), std::bind(get_x, _1), std::bind(get_x, _2));
+  auto less_y = std::bind(std::less<>(), std::bind(get_y, _1), std::bind(get_y, _2));
+
+  auto it_min_x = std::min_element(polygon.points.begin(), polygon.points.end(), less_x);
+  auto it_max_x = std::max_element(polygon.points.begin(), polygon.points.end(), less_x);
+  auto it_min_y = std::min_element(polygon.points.begin(), polygon.points.end(), less_y);
+  auto it_max_y = std::max_element(polygon.points.begin(), polygon.points.end(), less_y);
+
+  return {Point{it_min_x->x, it_min_y->y}, Point{it_max_x->x, it_max_y->y}};
+}
+
+std::pair< chernov::Point, chernov::Point > chernov::detail::getBoundingFrame(const std::vector< Polygon > & polygons)
+{
+  using namespace std::placeholders;
+
+  std::vector< std::pair< Point, Point > > boxes;
+  boxes.reserve(polygons.size());
+
+  std::pair< Point, Point >(*unary_op)(const Polygon &) = getBoundingFrame;
+  std::transform(polygons.begin(), polygons.end(), std::back_inserter(boxes), unary_op);
+
+  auto get_x = std::mem_fn(&Point::x);
+  auto get_y = std::mem_fn(&Point::y);
+  auto get_first = std::mem_fn(&std::pair< Point, Point >::first);
+  auto get_second = std::mem_fn(&std::pair< Point, Point >::second);
+
+  auto less_x_first = std::bind(std::less<>(),
+      std::bind(get_x, std::bind(get_first, _1)),
+      std::bind(get_x, std::bind(get_first, _2)));
+  auto less_y_first = std::bind(std::less<>(),
+      std::bind(get_y, std::bind(get_first, _1)),
+      std::bind(get_y, std::bind(get_first, _2)));
+
+  auto less_x_second = std::bind(std::less<>(),
+      std::bind(get_x, std::bind(get_second, _1)),
+      std::bind(get_x, std::bind(get_second, _2)));
+  auto less_y_second = std::bind(std::less<>(),
+      std::bind(get_y, std::bind(get_second, _1)),
+      std::bind(get_y, std::bind(get_second, _2)));
+
+  auto it_min_x = std::min_element(boxes.begin(), boxes.end(), less_x_first);
+  auto it_min_y = std::min_element(boxes.begin(), boxes.end(), less_y_first);
+  auto it_max_x = std::max_element(boxes.begin(), boxes.end(), less_x_second);
+  auto it_max_y = std::max_element(boxes.begin(), boxes.end(), less_y_second);
+
+  return {{it_min_x->first.x, it_min_y->first.y}, {it_max_x->second.x, it_max_y->second.y}};
 }

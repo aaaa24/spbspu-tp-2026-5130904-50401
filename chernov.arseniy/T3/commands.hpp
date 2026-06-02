@@ -18,6 +18,7 @@ namespace chernov {
   void cmdMax(std::istream &, std::ostream &, const std::vector< Polygon > &);
   void cmdMin(std::istream &, std::ostream &, const std::vector< Polygon > &);
   void cmdCount(std::istream &, std::ostream &, const std::vector< Polygon > &);
+  void cmdInframe(std::istream &, std::ostream &, const std::vector< Polygon > &);
 
   namespace detail {
     template< class Container >
@@ -35,6 +36,8 @@ namespace chernov {
     std::pair< size_t, size_t > getMinMaxCountVertexes(const std::vector< Polygon > & polygons);
     size_t countPolygonsWithNumOfVertexes(const std::vector< Polygon > & polygons, size_t num_of_vertexes);
     size_t countPolygonsWithParam(const std::vector< Polygon > & polygons, const std::string & param);
+    std::pair< Point, Point > getBoundingFrame(const Polygon & polygon);
+    std::pair< Point, Point > getBoundingFrame(const std::vector< Polygon > & polygons);
   }
 }
 
