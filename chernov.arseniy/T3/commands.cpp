@@ -364,17 +364,18 @@ std::pair< chernov::Point, chernov::Point > chernov::detail::getBoundingFrame(co
   return {{it_min_x->first.x, it_min_y->first.y}, {it_max_x->second.x, it_max_y->second.y}};
 }
 
-bool chernov::detail::isSame(const Polygon & p1, const Polygon & p2)
+bool chernov::detail::isSameWithShift(const Polygon & p1, const Polygon & p2, size_t shift)
 {
-  if (p1.points.empty() || p2.points.empty()) {
-    return p1.points.empty() && p2.points.empty();
-  }
-  if (p1.points.size() != p2.points.size()) {
-    return false;
+  size_t n = p1.points.size();
+  if (shift >= n) {
+      return false;
   }
 
-  int dx = p2.points[0].x - p1.points[0].x;
-  int dy = p2.points[0].y - p1.points[0].y;
+  std::vector< Point > rotated(n);
+  std::rotate_copy(p2.points.begin(), p2.points.begin() + shift, p2.points.end(), rotated.begin());
+
+  int dx = rotated[0].x - p1.points[0].x;
+  int dy = rotated[0].y - p1.points[0].y;
 
   using namespace std::placeholders;
   auto get_x = std::mem_fn(&Point::x);
@@ -385,5 +386,31 @@ bool chernov::detail::isSame(const Polygon & p1, const Polygon & p2)
   auto comp_y = std::bind(std::equal_to<>{}, std::bind(get_y, _1), calc_y);
   auto binary_pred = std::bind(std::logical_and<>{}, comp_x, comp_y);
 
-  return std::equal(p1.points.begin(), p1.points.end(), p2.points.begin(), binary_pred);
+  bool ok = std::equal(p1.points.begin(), p1.points.end(), rotated.begin(), binary_pred);
+  if (ok) {
+    return true;
+  }
+  return isSameWithShift(p1, p2, shift + 1);
+}
+
+bool chernov::detail::isSame(const Polygon & p1, const Polygon & p2)
+{
+  if (p1.points.empty() || p2.points.empty()) {
+    return p1.points.empty() && p2.points.empty();
+  }
+  if (p1.points.size() != p2.points.size()) {
+    return false;
+  }
+
+  if (isSameWithShift(p1, p2, 0)) {
+    return true;
+  }
+
+  std::vector< Point > reversed;
+  reversed.reserve(p1.points.size());
+  reversed.reserve(p1.points.size());
+  std::reverse_copy(p2.points.begin(), p2.points.end(), std::back_inserter(reversed));
+  Polygon p2_reversed;
+  p2_reversed.points = std::move(reversed);
+  return isSameWithShift(p1, p2_reversed, 0);
 }

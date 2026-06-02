@@ -39,6 +39,7 @@ namespace chernov {
     size_t countPolygonsWithParam(const std::vector< Polygon > & polygons, const std::string & param);
     std::pair< Point, Point > getBoundingFrame(const Polygon & polygon);
     std::pair< Point, Point > getBoundingFrame(const std::vector< Polygon > & polygons);
+    bool isSameWithShift(const Polygon & p1, const Polygon & p2, size_t shift);
     bool isSame(const Polygon & p1, const Polygon & p2);
   }
 }
