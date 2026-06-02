@@ -19,6 +19,7 @@ namespace chernov {
   void cmdMin(std::istream &, std::ostream &, const std::vector< Polygon > &);
   void cmdCount(std::istream &, std::ostream &, const std::vector< Polygon > &);
   void cmdInframe(std::istream &, std::ostream &, const std::vector< Polygon > &);
+  void cmdSame(std::istream &, std::ostream &, const std::vector< Polygon > &);
 
   namespace detail {
     template< class Container >
@@ -38,6 +39,7 @@ namespace chernov {
     size_t countPolygonsWithParam(const std::vector< Polygon > & polygons, const std::string & param);
     std::pair< Point, Point > getBoundingFrame(const Polygon & polygon);
     std::pair< Point, Point > getBoundingFrame(const std::vector< Polygon > & polygons);
+    bool isSame(const Polygon & p1, const Polygon & p2);
   }
 }
 

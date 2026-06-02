@@ -31,6 +31,7 @@ int main(int argc, char ** argv)
   cmds["MIN"] = chernov::cmdMin;
   cmds["COUNT"] = chernov::cmdCount;
   cmds["INFRAME"] = chernov::cmdInframe;
+  cmds["SAME"] = chernov::cmdSame;
 
   chernov::runCommands(std::cin, std::cout, cmds, polygons);
 }

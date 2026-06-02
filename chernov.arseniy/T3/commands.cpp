@@ -145,6 +145,19 @@ void chernov::cmdInframe(std::istream & input, std::ostream & output, const std:
   }
 }
 
+void chernov::cmdSame(std::istream & input, std::ostream & output, const std::vector< Polygon > & polygons)
+{
+  Polygon polygon;
+  if (!(input >> polygon)) {
+    return;
+  }
+
+  using namespace std::placeholders;
+  auto pred = std::bind(detail::isSame, _1, std::ref(polygon));
+  size_t count = std::count_if(polygons.begin(), polygons.end(), pred);
+  output << count << "\n";
+}
+
 template< class Container >
 std::vector< double > chernov::detail::getAreas(const Container & polygons)
 {
@@ -349,4 +362,28 @@ std::pair< chernov::Point, chernov::Point > chernov::detail::getBoundingFrame(co
   auto it_max_y = std::max_element(boxes.begin(), boxes.end(), less_y_second);
 
   return {{it_min_x->first.x, it_min_y->first.y}, {it_max_x->second.x, it_max_y->second.y}};
+}
+
+bool chernov::detail::isSame(const Polygon & p1, const Polygon & p2)
+{
+  if (p1.points.empty() || p2.points.empty()) {
+    return p1.points.empty() && p2.points.empty();
+  }
+  if (p1.points.size() != p2.points.size()) {
+    return false;
+  }
+
+  int dx = p2.points[0].x - p1.points[0].x;
+  int dy = p2.points[0].y - p1.points[0].y;
+
+  using namespace std::placeholders;
+  auto get_x = std::mem_fn(&Point::x);
+  auto get_y = std::mem_fn(&Point::y);
+  auto calc_x = std::bind(std::minus<>{}, std::bind(get_x, _2), dx);
+  auto calc_y = std::bind(std::minus<>{}, std::bind(get_y, _2), dy);
+  auto comp_x = std::bind(std::equal_to<>{}, std::bind(get_x, _1), calc_x);
+  auto comp_y = std::bind(std::equal_to<>{}, std::bind(get_y, _1), calc_y);
+  auto binary_pred = std::bind(std::logical_and<>{}, comp_x, comp_y);
+
+  return std::equal(p1.points.begin(), p1.points.end(), p2.points.begin(), binary_pred);
 }
