@@ -43,6 +43,9 @@ void chernov::cmdArea(std::istream & input, std::ostream & output, const std::ve
   double area = 0.0;
   try {
     size_t num_of_vertexes = std::stoull(param);
+    if (num_of_vertexes < 3) {
+      throw std::runtime_error("invalid command\n");
+    }
     area = detail::calcAreaSumWithNumOfVertexes(polygons, num_of_vertexes);
   } catch (...) {
     if (param == "EVEN" || param == "ODD") {
