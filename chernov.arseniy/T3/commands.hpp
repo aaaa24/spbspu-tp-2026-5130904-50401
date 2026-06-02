@@ -11,8 +11,18 @@
 namespace chernov {
   using cmd_t = std::function< void(std::istream &, std::ostream &, const std::vector< Polygon > &) >;
 
-  void runCommands(std::istream & input, std::ostream & output,
-    const std::unordered_map< std::string, cmd_t > & cmds, const std::vector< Polygon > & polygons);
+  struct CommandIO {
+    std::ostream & output;
+    const std::unordered_map< std::string, cmd_t > & cmds;
+    const std::vector< Polygon > & polygons;
+  };
+
+  struct EndlIO {};
+
+  std::istream & operator>>(std::istream & input, CommandIO & cmd_io);
+  std::istream & operator>>(std::istream & input, EndlIO &&);
+
+  void runCommands(std::istream & input, CommandIO & cmd_io);
 
   void cmdArea(std::istream &, std::ostream &, const std::vector< Polygon > &);
   void cmdMax(std::istream &, std::ostream &, const std::vector< Polygon > &);

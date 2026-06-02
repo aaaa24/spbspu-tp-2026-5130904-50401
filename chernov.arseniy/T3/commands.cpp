@@ -6,31 +6,55 @@
 #include <numeric>
 #include <string>
 
-void chernov::runCommands(std::istream & input, std::ostream & output,
-  const std::unordered_map< std::string, cmd_t > & cmds, const std::vector< Polygon > & polygons)
+std::istream & chernov::operator>>(std::istream & input, CommandIO & cmd_io)
 {
+  std::istream::sentry sentry(input);
+  if (!sentry) {
+    return input;
+  }
+
   std::string str = "";
   input >> str;
 
   if (input) {
     try {
-      cmds.at(str)(input, output, polygons);
-    } catch(...) {
-      input.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
-      output << "<INVALID COMMAND>\n";
+      cmd_io.cmds.at(str)(input, cmd_io.output, cmd_io.polygons);
+    } catch (...) {
+      input.setstate(std::ios::failbit);
     }
   }
 
-  if (input.eof()) {
-    return;
-  }
-
-  if (!input) {
+  if (!input && !input.eof()) {
     input.clear();
     input.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
+    cmd_io.output << "<INVALID COMMAND>\n";
   }
 
-  runCommands(input, output, cmds, polygons);
+  return input;
+}
+
+std::istream & chernov::operator>>(std::istream & input, EndlIO &&)
+{
+  std::istream::sentry sentry(input);
+  if (!sentry) {
+    return input;
+  }
+
+  char c = 0;
+  input >> c;
+  if (input && c != '\n') {
+    input.setstate(std::ios::failbit);
+  }
+
+  return input;
+}
+
+void chernov::runCommands(std::istream & input, CommandIO & cmd_io)
+{
+  if (!(input >> cmd_io)) {
+    return;
+  }
+  runCommands(input, cmd_io);
 }
 
 void chernov::cmdArea(std::istream & input, std::ostream & output, const std::vector< Polygon > & polygons)
