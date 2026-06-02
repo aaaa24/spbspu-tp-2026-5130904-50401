@@ -75,6 +75,24 @@ void chernov::cmdMax(std::istream & input, std::ostream & output, const std::vec
   }
 }
 
+void chernov::cmdMin(std::istream & input, std::ostream & output, const std::vector< Polygon > & polygons)
+{
+  std::string param = "";
+  if (!(input >> param)) {
+    return;
+  }
+
+  if (param == "AREA") {
+    double min_area = detail::getMinMaxArea(polygons).first;
+    output << std::fixed << std::setprecision(1) << min_area << "\n";
+  } else if (param == "VERTEXES") {
+    size_t min_count_vertexes = detail::getMinMaxCountVertexes(polygons).first;
+    output << min_count_vertexes << "\n";
+  } else {
+    output << "<INVALID COMMAND>\n";
+  }
+}
+
 template< class Container >
 std::vector< double > chernov::detail::getAreas(const Container & polygons)
 {

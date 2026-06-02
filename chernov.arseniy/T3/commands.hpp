@@ -16,6 +16,7 @@ namespace chernov {
 
   void cmdArea(std::istream &, std::ostream &, const std::vector< Polygon > &);
   void cmdMax(std::istream &, std::ostream &, const std::vector< Polygon > &);
+  void cmdMin(std::istream &, std::ostream &, const std::vector< Polygon > &);
 
   namespace detail {
     template< class Container >

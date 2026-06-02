@@ -28,6 +28,7 @@ int main(int argc, char ** argv)
   std::unordered_map< std::string, chernov::cmd_t > cmds;
   cmds["AREA"] = chernov::cmdArea;
   cmds["MAX"] = chernov::cmdMax;
+  cmds["MIN"] = chernov::cmdMin;
 
   chernov::runCommands(std::cin, std::cout, cmds, polygons);
 }
