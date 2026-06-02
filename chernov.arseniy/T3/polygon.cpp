@@ -28,6 +28,11 @@ std::istream & chernov::operator>>(std::istream & input, Polygon & dest)
     return input;
   }
 
+  if (size < 3) {
+    input.setstate(std::ios::failbit);
+    return input;
+  }
+
   dest.points.clear();
   dest.points.reserve(size);
 
