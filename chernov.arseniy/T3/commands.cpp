@@ -1,14 +1,13 @@
 #include "commands.hpp"
 
 #include <algorithm>
-#include <functional>
 #include <iomanip>
 #include <limits>
 #include <numeric>
 #include <string>
 
 void chernov::runCommands(std::istream & input, std::ostream & output,
-  const std::unordered_map< std::string, cmd_t > & cmds, std::vector< Polygon > & polygons)
+  const std::unordered_map< std::string, cmd_t > & cmds, const std::vector< Polygon > & polygons)
 {
   std::string str = "";
   input >> str;
@@ -33,7 +32,7 @@ void chernov::runCommands(std::istream & input, std::ostream & output,
   runCommands(input, output, cmds, polygons);
 }
 
-void chernov::cmdArea(std::istream & input, std::ostream & output, std::vector< Polygon > & polygons)
+void chernov::cmdArea(std::istream & input, std::ostream & output, const std::vector< Polygon > & polygons)
 {
   std::string param = "";
   if (!(input >> param)) {
@@ -46,7 +45,7 @@ void chernov::cmdArea(std::istream & input, std::ostream & output, std::vector< 
     output << num_of_vertex << "\n";
   } catch (...) {
     if (param == "EVEN" || param == "ODD") {
-
+      area = detail::calcAreaSum(polygons, param);
     } else if (param == "MEAN") {
       area = detail::calcAreaMean(polygons);
     } else {
@@ -94,5 +93,32 @@ double chernov::detail::calcAreaMean(const std::vector< Polygon > & polygons)
   std::transform(polygons.begin(), polygons.end(), std::back_inserter(areas), calcArea);
 
   double area = std::accumulate(areas.begin(), areas.end(), 0.0) / polygons.size();
+  return area;
+}
+
+double chernov::detail::calcAreaSum(const std::vector< Polygon > & polygons, const std::string & param)
+{
+  std::vector< std::reference_wrapper< const Polygon > > filtered;
+
+  using namespace std::placeholders;
+  auto get_points = std::mem_fn(&Polygon::points);
+  auto get_size = std::mem_fn(&std::vector< Point >::size);
+  auto poly_size = std::bind(get_size, std::bind(get_points, _1));
+  auto odd = std::bind(std::modulus< size_t >{}, poly_size, 2);
+  auto even = std::bind(std::logical_not< bool >{}, odd);
+
+  if (param == "EVEN") {
+    std::copy_if(polygons.begin(), polygons.end(), std::back_inserter(filtered), even);
+  } else if (param == "ODD") {
+    std::copy_if(polygons.begin(), polygons.end(), std::back_inserter(filtered), odd);
+  } else {
+    throw std::invalid_argument("param must be \"even\" or \"odd\"");
+  }
+
+  std::vector< double > areas;
+  areas.reserve(filtered.size());
+  std::transform(filtered.begin(), filtered.end(), std::back_inserter(areas), calcArea);
+
+  double area = std::accumulate(areas.begin(), areas.end(), 0.0);
   return area;
 }
