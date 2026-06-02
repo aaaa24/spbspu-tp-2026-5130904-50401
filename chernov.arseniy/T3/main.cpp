@@ -29,6 +29,7 @@ int main(int argc, char ** argv)
   cmds["AREA"] = chernov::cmdArea;
   cmds["MAX"] = chernov::cmdMax;
   cmds["MIN"] = chernov::cmdMin;
+  cmds["COUNT"] = chernov::cmdCount;
 
   chernov::runCommands(std::cin, std::cout, cmds, polygons);
 }

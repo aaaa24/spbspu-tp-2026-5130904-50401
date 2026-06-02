@@ -93,6 +93,28 @@ void chernov::cmdMin(std::istream & input, std::ostream & output, const std::vec
   }
 }
 
+void chernov::cmdCount(std::istream & input, std::ostream & output, const std::vector< Polygon > & polygons)
+{
+  std::string param = "";
+  if (!(input >> param)) {
+    return;
+  }
+
+  size_t count_polygons = 0;
+  try {
+    size_t num_of_vertexes = std::stoull(param);
+    count_polygons = detail::countPolygonsWithNumOfVertexes(polygons, num_of_vertexes);
+  } catch (...) {
+    if (param == "EVEN" || param == "ODD") {
+      count_polygons = detail::countPolygonsWithParam(polygons, param);
+    } else {
+        throw std::runtime_error("invalid command\n");
+    }
+  }
+
+  output << count_polygons << "\n";
+}
+
 template< class Container >
 std::vector< double > chernov::detail::getAreas(const Container & polygons)
 {
@@ -153,8 +175,8 @@ double chernov::detail::calcAreaSum(const std::vector< Polygon > & polygons, con
   auto get_points = std::mem_fn(&Polygon::points);
   auto get_size = std::mem_fn(&std::vector< Point >::size);
   auto get_count_vertexes = std::bind(get_size, std::bind(get_points, _1));
-  auto odd = std::bind(std::modulus< size_t >{}, get_count_vertexes, 2);
-  auto even = std::bind(std::logical_not< bool >{}, odd);
+  auto odd = std::bind(std::modulus<>{}, get_count_vertexes, 2);
+  auto even = std::bind(std::logical_not<>{}, odd);
 
   if (param == "EVEN") {
     std::copy_if(polygons.begin(), polygons.end(), std::back_inserter(filtered), even);
@@ -193,12 +215,8 @@ std::pair< double, double > chernov::detail::getMinMaxArea(const std::vector< Po
   return {*minmax.first, *minmax.second};
 }
 
-std::pair< size_t, size_t > chernov::detail::getMinMaxCountVertexes(const std::vector< Polygon > & polygons)
+std::vector< size_t > chernov::detail::getVertexes(const std::vector< Polygon > & polygons)
 {
-  if (polygons.size() == 0) {
-    throw std::invalid_argument("poligon's size must be greater than 0");
-  }
-
   using namespace std::placeholders;
   auto get_points = std::mem_fn(&Polygon::points);
   auto get_size = std::mem_fn(&std::vector< Point >::size);
@@ -208,6 +226,43 @@ std::pair< size_t, size_t > chernov::detail::getMinMaxCountVertexes(const std::v
   vertexes.reserve(polygons.size());
   std::transform(polygons.begin(), polygons.end(), std::back_inserter(vertexes), get_count_vertexes);
 
+  return vertexes;
+}
+
+std::pair< size_t, size_t > chernov::detail::getMinMaxCountVertexes(const std::vector< Polygon > & polygons)
+{
+  if (polygons.size() == 0) {
+    throw std::invalid_argument("poligon's size must be greater than 0");
+  }
+
+  std::vector< size_t > vertexes = getVertexes(polygons);
+
   auto minmax = std::minmax_element(vertexes.begin(), vertexes.end());
   return {*minmax.first, *minmax.second};
+}
+
+size_t chernov::detail::countPolygonsWithNumOfVertexes(const std::vector< Polygon > & polygons, size_t num_of_vertexes)
+{
+  std::vector< size_t > vertexes = getVertexes(polygons);
+
+  using namespace std::placeholders;
+  auto pred = std::bind(std::equal_to<>{}, _1, num_of_vertexes);
+  return std::count_if(vertexes.begin(), vertexes.end(), pred);
+}
+
+size_t chernov::detail::countPolygonsWithParam(const std::vector< Polygon > & polygons, const std::string & param)
+{
+  std::vector< size_t > vertexes = getVertexes(polygons);
+
+  using namespace std::placeholders;
+  auto odd = std::bind(std::modulus<>{}, _1, 2);
+  auto even = std::bind(std::logical_not<>{}, odd);
+
+  if (param == "EVEN") {
+    return std::count_if(vertexes.begin(), vertexes.end(), even);
+  } else if (param == "ODD") {
+    return std::count_if(vertexes.begin(), vertexes.end(), odd);
+  } else {
+    throw std::invalid_argument("param must be \"even\" or \"odd\"");
+  }
 }

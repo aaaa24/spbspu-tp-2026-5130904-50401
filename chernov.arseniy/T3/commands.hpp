@@ -17,6 +17,7 @@ namespace chernov {
   void cmdArea(std::istream &, std::ostream &, const std::vector< Polygon > &);
   void cmdMax(std::istream &, std::ostream &, const std::vector< Polygon > &);
   void cmdMin(std::istream &, std::ostream &, const std::vector< Polygon > &);
+  void cmdCount(std::istream &, std::ostream &, const std::vector< Polygon > &);
 
   namespace detail {
     template< class Container >
@@ -30,7 +31,10 @@ namespace chernov {
     double calcAreaSum(const std::vector< Polygon > & polygons, const std::string & param);
     double calcAreaSumWithNumOfVertexes(const std::vector< Polygon > & polygons, size_t num_of_vertexes);
     std::pair< double, double > getMinMaxArea(const std::vector< Polygon > & polygons);
+    std::vector< size_t > getVertexes(const std::vector< Polygon > & polygons);
     std::pair< size_t, size_t > getMinMaxCountVertexes(const std::vector< Polygon > & polygons);
+    size_t countPolygonsWithNumOfVertexes(const std::vector< Polygon > & polygons, size_t num_of_vertexes);
+    size_t countPolygonsWithParam(const std::vector< Polygon > & polygons, const std::string & param);
   }
 }
 
