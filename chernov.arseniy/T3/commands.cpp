@@ -57,6 +57,24 @@ void chernov::cmdArea(std::istream & input, std::ostream & output, const std::ve
   output << std::fixed << std::setprecision(1) << area << "\n";
 }
 
+void chernov::cmdMax(std::istream & input, std::ostream & output, const std::vector< Polygon > & polygons)
+{
+  std::string param = "";
+  if (!(input >> param)) {
+    return;
+  }
+
+  if (param == "AREA") {
+    double max_area = detail::getMinMaxArea(polygons).second;
+    output << std::fixed << std::setprecision(1) << max_area << "\n";
+  } else if (param == "VERTEXES") {
+    size_t max_count_vertexes = detail::getMinMaxCountVertexes(polygons).second;
+    output << max_count_vertexes << "\n";
+  } else {
+    output << "<INVALID COMMAND>\n";
+  }
+}
+
 template< class Container >
 std::vector< double > chernov::detail::getAreas(const Container & polygons)
 {
@@ -116,8 +134,8 @@ double chernov::detail::calcAreaSum(const std::vector< Polygon > & polygons, con
   using namespace std::placeholders;
   auto get_points = std::mem_fn(&Polygon::points);
   auto get_size = std::mem_fn(&std::vector< Point >::size);
-  auto poly_size = std::bind(get_size, std::bind(get_points, _1));
-  auto odd = std::bind(std::modulus< size_t >{}, poly_size, 2);
+  auto get_count_vertexes = std::bind(get_size, std::bind(get_points, _1));
+  auto odd = std::bind(std::modulus< size_t >{}, get_count_vertexes, 2);
   auto even = std::bind(std::logical_not< bool >{}, odd);
 
   if (param == "EVEN") {
@@ -138,10 +156,32 @@ double chernov::detail::calcAreaSumWithNumOfVertexes(const std::vector< Polygon 
   using namespace std::placeholders;
   auto get_points = std::mem_fn(&Polygon::points);
   auto get_size = std::mem_fn(&std::vector< Point >::size);
-  auto poly_size = std::bind(get_size, std::bind(get_points, _1));
-  auto pred = std::bind(std::equal_to< size_t >{}, poly_size, num_of_vertexes);
+  auto get_count_vertexes = std::bind(get_size, std::bind(get_points, _1));
+  auto pred = std::bind(std::equal_to< size_t >{}, get_count_vertexes, num_of_vertexes);
 
   std::copy_if(polygons.begin(), polygons.end(), std::back_inserter(filtered), pred);
 
   return getSumOfAreas(filtered);
+}
+
+std::pair< double, double > chernov::detail::getMinMaxArea(const std::vector< Polygon > & polygons)
+{
+  std::vector< double > areas = getAreas(polygons);
+  auto minmax = std::minmax_element(areas.begin(), areas.end());
+  return {*minmax.first, *minmax.second};
+}
+
+std::pair< size_t, size_t > chernov::detail::getMinMaxCountVertexes(const std::vector< Polygon > & polygons)
+{
+  using namespace std::placeholders;
+  auto get_points = std::mem_fn(&Polygon::points);
+  auto get_size = std::mem_fn(&std::vector< Point >::size);
+  auto get_count_vertexes = std::bind(get_size, std::bind(get_points, _1));
+
+  std::vector< size_t > vertexes;
+  vertexes.reserve(polygons.size());
+  std::transform(polygons.begin(), polygons.end(), std::back_inserter(vertexes), get_count_vertexes);
+
+  auto minmax = std::minmax_element(vertexes.begin(), vertexes.end());
+  return {*minmax.first, *minmax.second};
 }
