@@ -13,9 +13,10 @@ void chernov::runCommands(std::istream & input, std::ostream & output,
   input >> str;
 
   if (input) {
-    if (cmds.count(str)) {
+    try {
       cmds.at(str)(input, output, polygons);
-    } else {
+    } catch(...) {
+      input.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
       output << "<INVALID COMMAND>\n";
     }
   }
@@ -26,7 +27,7 @@ void chernov::runCommands(std::istream & input, std::ostream & output,
 
   if (!input) {
     input.clear();
-    input.ignore(std::numeric_limits< std::streamsize >::max());
+    input.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
   }
 
   runCommands(input, output, cmds, polygons);
@@ -49,8 +50,7 @@ void chernov::cmdArea(std::istream & input, std::ostream & output, const std::ve
     } else if (param == "MEAN") {
       area = detail::calcAreaMean(polygons);
     } else {
-      output << "<INVALID COMMAND>\n";
-      return;
+        throw std::runtime_error("invalid command\n");
     }
   }
 
@@ -71,7 +71,7 @@ void chernov::cmdMax(std::istream & input, std::ostream & output, const std::vec
     size_t max_count_vertexes = detail::getMinMaxCountVertexes(polygons).second;
     output << max_count_vertexes << "\n";
   } else {
-    output << "<INVALID COMMAND>\n";
+    throw std::runtime_error("invalid command\n");
   }
 }
 
@@ -89,7 +89,7 @@ void chernov::cmdMin(std::istream & input, std::ostream & output, const std::vec
     size_t min_count_vertexes = detail::getMinMaxCountVertexes(polygons).first;
     output << min_count_vertexes << "\n";
   } else {
-    output << "<INVALID COMMAND>\n";
+    throw std::runtime_error("invalid command\n");
   }
 }
 
@@ -138,7 +138,7 @@ double chernov::detail::calcArea(const Polygon & polygon)
 double chernov::detail::calcAreaMean(const std::vector< Polygon > & polygons)
 {
   if (polygons.size() == 0) {
-    return 0.0;
+    throw std::invalid_argument("poligon's size must be greater than 0");
   }
 
   double area = getSumOfAreas(polygons) / polygons.size();
@@ -184,6 +184,10 @@ double chernov::detail::calcAreaSumWithNumOfVertexes(const std::vector< Polygon 
 
 std::pair< double, double > chernov::detail::getMinMaxArea(const std::vector< Polygon > & polygons)
 {
+  if (polygons.size() == 0) {
+    throw std::invalid_argument("poligon's size must be greater than 0");
+  }
+
   std::vector< double > areas = getAreas(polygons);
   auto minmax = std::minmax_element(areas.begin(), areas.end());
   return {*minmax.first, *minmax.second};
@@ -191,6 +195,10 @@ std::pair< double, double > chernov::detail::getMinMaxArea(const std::vector< Po
 
 std::pair< size_t, size_t > chernov::detail::getMinMaxCountVertexes(const std::vector< Polygon > & polygons)
 {
+  if (polygons.size() == 0) {
+    throw std::invalid_argument("poligon's size must be greater than 0");
+  }
+
   using namespace std::placeholders;
   auto get_points = std::mem_fn(&Polygon::points);
   auto get_size = std::mem_fn(&std::vector< Point >::size);
