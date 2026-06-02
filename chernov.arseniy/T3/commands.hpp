@@ -17,9 +17,16 @@ namespace chernov {
   void cmdArea(std::istream &, std::ostream &, const std::vector< Polygon > &);
 
   namespace detail {
+    template< class Container >
+    std::vector< double > getAreas(const Container & polygons);
+
+    template< class Container >
+    double getSumOfAreas(const Container & polygons);
+
     double calcArea(const Polygon & polygon);
     double calcAreaMean(const std::vector< Polygon > & polygons);
     double calcAreaSum(const std::vector< Polygon > & polygons, const std::string & param);
+    double calcAreaSumWithNumOfVertexes(const std::vector< Polygon > & polygons, size_t num_of_vertexes);
   }
 }
 
