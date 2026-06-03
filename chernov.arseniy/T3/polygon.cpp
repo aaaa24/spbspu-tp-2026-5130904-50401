@@ -84,7 +84,7 @@ void chernov::inputPolygons(std::istream & input, std::vector< Polygon > & polyg
 void chernov::detail::skipSpaces(std::istream & input)
 {
   int ch = input.peek();
-  if (ch == ' ' || ch == '\t') {
+  if (ch == ' ' || ch == '\t' || ch == '\r') {
     input.get();
     skipSpaces(input);
   }

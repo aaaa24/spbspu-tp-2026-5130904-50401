@@ -24,7 +24,7 @@ std::istream & chernov::operator>>(std::istream & input, CommandIO & cmd_io)
     }
   }
 
-  if (!input && !input.eof()) {
+  if (!input) {
     input.clear();
     input.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
     cmd_io.output << "<INVALID COMMAND>\n";
@@ -61,7 +61,7 @@ void chernov::cmdArea(std::istream & input, std::ostream & output, const std::ve
 {
   std::string param = "";
   if (!(input >> param)) {
-    return;
+    throw std::runtime_error("invalid command\n");
   }
 
   double area = 0.0;
@@ -88,7 +88,7 @@ void chernov::cmdMax(std::istream & input, std::ostream & output, const std::vec
 {
   std::string param = "";
   if (!(input >> param)) {
-    return;
+    throw std::runtime_error("invalid command\n");
   }
 
   if (param == "AREA") {
@@ -106,7 +106,7 @@ void chernov::cmdMin(std::istream & input, std::ostream & output, const std::vec
 {
   std::string param = "";
   if (!(input >> param)) {
-    return;
+    throw std::runtime_error("invalid command\n");
   }
 
   if (param == "AREA") {
@@ -124,7 +124,7 @@ void chernov::cmdCount(std::istream & input, std::ostream & output, const std::v
 {
   std::string param = "";
   if (!(input >> param)) {
-    return;
+    throw std::runtime_error("invalid command\n");
   }
 
   size_t count_polygons = 0;
@@ -149,7 +149,7 @@ void chernov::cmdInframe(std::istream & input, std::ostream & output, const std:
 {
   Polygon polygon;
   if (!(input >> polygon)) {
-    return;
+    throw std::runtime_error("invalid command\n");
   }
 
   std::pair< Point, Point > frame = detail::getBoundingFrame(polygons);
@@ -179,7 +179,7 @@ void chernov::cmdSame(std::istream & input, std::ostream & output, const std::ve
 {
   Polygon polygon;
   if (!(input >> polygon)) {
-    return;
+    throw std::runtime_error("invalid command\n");
   }
 
   using namespace std::placeholders;
