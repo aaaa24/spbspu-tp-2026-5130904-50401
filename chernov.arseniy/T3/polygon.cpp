@@ -64,12 +64,12 @@ std::istream & chernov::detail::operator>>(std::istream & input, DelimiterIO && 
 
 void chernov::inputPolygons(std::istream & input, std::vector< Polygon > & polygons)
 {
-  Polygon p;
-  input >> p;
-
   if (input.eof()) {
     return;
   }
+
+  Polygon p;
+  input >> p;
 
   if (!input.fail()) {
     polygons.push_back(p);
@@ -78,7 +78,9 @@ void chernov::inputPolygons(std::istream & input, std::vector< Polygon > & polyg
     input.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
   }
 
-  inputPolygons(input, polygons);
+  if (!input.eof()) {
+    inputPolygons(input, polygons);
+  }
 }
 
 void chernov::detail::skipSpaces(std::istream & input)
