@@ -33,18 +33,14 @@ std::istream & chernov::operator>>(std::istream & input, Polygon & dest)
     return input;
   }
 
-  std::vector< Point > points;
-  points.reserve(size);
+  dest.points.clear();
+  dest.points.reserve(size);
 
   using iit_t = std::istream_iterator< Point >;
-  std::copy_n(iit_t{input}, size, std::back_inserter(points));
+  std::copy_n(iit_t{input}, size, std::back_inserter(dest.points));
 
   if (dest.points.size() < size) {
     input.setstate(std::ios::failbit);
-  }
-
-  if (input) {
-    dest.points = std::move(points);
   }
 
   return input;
@@ -62,22 +58,6 @@ std::istream & chernov::operator>>(std::istream & input, DelimiterIO && dest)
   if (input && c != dest.exp) {
     input.setstate(std::ios::failbit);
   }
-  return input;
-}
-
-std::istream & chernov::operator>>(std::istream & input, EndlIO &&)
-{
-  std::istream::sentry sentry(input);
-  if (!sentry) {
-    return input;
-  }
-
-  char c = 0;
-  input >> c;
-  if (input && c != '\n') {
-    input.setstate(std::ios::failbit);
-  }
-
   return input;
 }
 

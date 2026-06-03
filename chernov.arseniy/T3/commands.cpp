@@ -33,6 +33,22 @@ std::istream & chernov::operator>>(std::istream & input, CommandIO & cmd_io)
   return input;
 }
 
+std::istream & chernov::operator>>(std::istream & input, EndlIO &&)
+{
+  std::istream::sentry sentry(input);
+  if (!sentry) {
+    return input;
+  }
+
+  char c = 0;
+  input >> c;
+  if (input && c != '\n') {
+    input.setstate(std::ios::failbit);
+  }
+
+  return input;
+}
+
 void chernov::runCommands(std::istream & input, CommandIO & cmd_io)
 {
   if (!(input >> cmd_io)) {
