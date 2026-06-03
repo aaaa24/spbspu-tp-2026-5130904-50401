@@ -17,10 +17,7 @@ namespace chernov {
     const std::vector< Polygon > & polygons;
   };
 
-  struct EndlIO {};
-
   std::istream & operator>>(std::istream & input, CommandIO & cmd_io);
-  std::istream & operator>>(std::istream & input, EndlIO &&);
 
   void runCommands(std::istream & input, CommandIO & cmd_io);
 
