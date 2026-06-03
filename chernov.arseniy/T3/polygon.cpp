@@ -11,7 +11,7 @@ std::istream & chernov::operator>>(std::istream & input, Point & dest)
     return input;
   }
 
-  using sep = DelimiterIO;
+  using sep = detail::DelimiterIO;
   input >> sep{'('} >> dest.x >> sep{';'} >> dest.y >> sep{')'};
   return input;
 }
@@ -39,14 +39,15 @@ std::istream & chernov::operator>>(std::istream & input, Polygon & dest)
   using iit_t = std::istream_iterator< Point >;
   std::copy_n(iit_t{input}, size, std::back_inserter(dest.points));
 
-  if (dest.points.size() < size) {
+  if (dest.points.size() < size || !detail::isLineEnd(input)) {
     input.setstate(std::ios::failbit);
+    dest.points.clear();
   }
 
   return input;
 }
 
-std::istream & chernov::operator>>(std::istream & input, DelimiterIO && dest)
+std::istream & chernov::detail::operator>>(std::istream & input, DelimiterIO && dest)
 {
   std::istream::sentry sentry(input);
   if (!sentry) {
@@ -78,4 +79,20 @@ void chernov::inputPolygons(std::istream & input, std::vector< Polygon > & polyg
   }
 
   inputPolygons(input, polygons);
+}
+
+void chernov::detail::skipSpaces(std::istream & input)
+{
+  int ch = input.peek();
+  if (ch == ' ' || ch == '\t') {
+    input.get();
+    skipSpaces(input);
+  }
+}
+
+bool chernov::detail::isLineEnd(std::istream & input)
+{
+  skipSpaces(input);
+  int ch = input.peek();
+  return ch == '\n' || ch == EOF;
 }

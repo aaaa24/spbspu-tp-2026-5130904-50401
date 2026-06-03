@@ -13,15 +13,21 @@ namespace chernov {
     std::vector< Point > points;
   };
 
-  struct DelimiterIO {
-    char exp;
-  };
-
   std::istream & operator>>(std::istream & input, Point & dest);
   std::istream & operator>>(std::istream & input, Polygon & dest);
-  std::istream & operator>>(std::istream & input, DelimiterIO && dest);
 
   void inputPolygons(std::istream & input, std::vector< Polygon > & polygons);
+
+  namespace detail {
+    struct DelimiterIO {
+      char exp;
+    };
+
+    std::istream & operator>>(std::istream & input, DelimiterIO && dest);
+
+    void skipSpaces(std::istream & input);
+    bool isLineEnd(std::istream & input);
+  }
 }
 
 #endif
