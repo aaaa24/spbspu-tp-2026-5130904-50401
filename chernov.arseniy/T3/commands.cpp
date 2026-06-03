@@ -438,7 +438,6 @@ bool chernov::detail::isSame(const Polygon & p1, const Polygon & p2)
 
   std::vector< Point > reversed;
   reversed.reserve(p1.points.size());
-  reversed.reserve(p1.points.size());
   std::reverse_copy(p2.points.begin(), p2.points.end(), std::back_inserter(reversed));
   Polygon p2_reversed;
   p2_reversed.points = std::move(reversed);
