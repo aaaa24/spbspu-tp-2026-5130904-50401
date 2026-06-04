@@ -24,26 +24,22 @@ std::istream & chernov::operator>>(std::istream & input, Polygon & dest)
   }
 
   size_t size = 0;
-  if (!(input >> size)) {
-    return input;
-  }
-
-  if (size < 3) {
-    input.setstate(std::ios::failbit);
-    return input;
-  }
-
-  dest.points.clear();
-  dest.points.reserve(size);
-
-  using iit_t = std::istream_iterator< Point >;
-  std::copy_n(iit_t{input}, size, std::back_inserter(dest.points));
-
-  if (dest.points.size() < size || !detail::isLineEnd(input)) {
+  if (!(input >> size) || size < 3) {
     input.setstate(std::ios::failbit);
     dest.points.clear();
+    return input;
   }
 
+  std::vector< Point > temp;
+  temp.reserve(size);
+
+  if (!detail::readPoints(input, temp, size)) {
+    input.setstate(std::ios::failbit);
+    dest.points.clear();
+    return input;
+  }
+
+  dest.points = std::move(temp);
   return input;
 }
 
@@ -71,9 +67,9 @@ void chernov::inputPolygons(std::istream & input, std::vector< Polygon > & polyg
   Polygon p;
   input >> p;
 
-  if (!input.fail()) {
-    polygons.push_back(p);
-  } else {
+  if (!input.fail() && !p.points.empty()) {
+    polygons.push_back(std::move(p));
+  } else if (input.fail()) {
     input.clear();
     input.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
   }
@@ -81,6 +77,25 @@ void chernov::inputPolygons(std::istream & input, std::vector< Polygon > & polyg
   if (!input.eof()) {
     inputPolygons(input, polygons);
   }
+}
+
+bool chernov::detail::readPoints(std::istream & input, std::vector< Point > & points, size_t left)
+{
+  if (left == 0) {
+    return isLineEnd(input);
+  }
+
+  if (isLineEnd(input)) {
+    return false;
+  }
+
+  Point p{};
+  if (!(input >> p)) {
+    return false;
+  }
+
+  points.push_back(p);
+  return readPoints(input, points, left - 1);
 }
 
 void chernov::detail::skipSpaces(std::istream & input)

@@ -25,6 +25,7 @@ namespace chernov {
 
     std::istream & operator>>(std::istream & input, DelimiterIO && dest);
 
+    bool readPoints(std::istream & input, std::vector< Point > & points, size_t left);
     void skipSpaces(std::istream & input);
     bool isLineEnd(std::istream & input);
   }
