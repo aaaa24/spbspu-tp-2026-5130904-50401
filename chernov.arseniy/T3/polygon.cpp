@@ -67,7 +67,7 @@ void chernov::inputPolygons(std::istream & input, std::vector< Polygon > & polyg
   Polygon p;
   input >> p;
 
-  if (!input.fail() && !p.points.empty()) {
+  if ((!input.fail() || input.eof()) && !p.points.empty()) {
     polygons.push_back(std::move(p));
   } else if (input.fail()) {
     input.clear();
